@@ -23,28 +23,26 @@ $$
 where
 
 * **n** – required sample size  
-* $Z_{\alpha/2}$ – *z*-score for the desired confidence level  
-  *In our case we assume 1.96 for 95 % confidence.*  
-* **\(Z_{\beta}\)** – *z*-score for the desired power  
-  *We assume 0.84 for 80 % power.*  
-* **\(p_{1}, p_{2}\)** – proportions for the baseline and expected outcomes, respectively  
+* $Z_{\alpha/2}$ – *z*-score for the desired confidence level. In our case we assume 1.96 for 95 % confidence.  
+* $Z_{\beta}$ – *z*-score for the desired power. We assume 0.84 for 80 % power.*  
+* $p_{1}, p_{2}$ – proportions for the baseline and expected outcomes, respectively  
 * **MDE** – minimum detectable effect, where \(p_{2} = p_{1} + \text{MDE}\)  
-* **\(R^{2}\)** – proportion of the outcome variance explained by covariates  
+* $R^{2}$ – proportion of the outcome variance explained by covariates  
 
 ### Continuous outcome (dietary-diversity score)
 
 For the dietary-diversity outcome (a continuous variable), the sample size is defined as follows:
 
 $$
-n \;=\;
+n =
 \frac{2\left(\tfrac{Z_{\alpha}}{2} + Z_{\beta}\right)^{2}\sigma^{2}}{\text{MDE}^{2}}
-\;\times\; \frac{1}{1 - R^{2}}
+\times \frac{1}{1 - R^{2}}
 $$
 
 where
 
-* **\(\sigma^{2}\)** – adjusted variance,  
-  \(\sigma^{2}_{\!z} = \sigma^{2}\bigl(1 - R^{2}\bigr)\)
+* $\sigma^{2}$ – adjusted variance,  
+  $\sigma^{2}_{\!z} = \sigma^{2}\bigl(1 - R^{2}\bigr)$
 
 ### Clustering and design effect
 
@@ -57,28 +55,28 @@ A key concept in this process is the **Design Effect (DEFF)**, which measures th
 The **design effect** compares the variance of an estimator under the actual (cluster) design with the variance that would have been obtained from a simple random sample (SRS) of the same total size.  
 For a single-stage cluster sample with roughly equal cluster sizes, the design effect that captures the loss of efficiency caused by clustering is
 
-\[
+$$
 \text{DEFF}_{\text{cluster}}
-\;=\;
+=
 1 + (m - 1)\,\rho ,
-\]
+$$
 
 where  
 
-* \(m\) – average number of sampled units (e.g., households) per cluster  
-* \(\rho\) – intra-cluster correlation coefficient (ICC), i.e., the proportion of total outcome variance attributable to between-cluster variation  
+* **m** – average number of sampled units (e.g., households) per cluster  
+* $\rho$ – intra-cluster correlation coefficient (ICC), i.e., the proportion of total outcome variance attributable to between-cluster variation  
 
 
 #### Accounting for survey weights
 
 If sampling weights are applied, the overall design effect is the product of the clustering and weighting components:
 
-\[
+$$
 \text{DEFF}_{\text{total}}
-\;=\;
+=
 \text{DEFF}_{\text{cluster}}
 \times
 \bigl(1 + \mathrm{CV}_{w}^{2}\bigr),
-\]
+$$
 
-where \(\mathrm{CV}_{w}\) is the coefficient of variation of the final survey weights.
+where $\mathrm{CV}_{w}$ is the coefficient of variation of the final survey weights.
