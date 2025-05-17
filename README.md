@@ -86,5 +86,38 @@ $$
 
 where $\mathrm{CV}_{w}$ is the coefficient of variation of the final survey weights.
 
-## Sampling Design - Results
+## Incorporation of Fragility and Gender Strata
 
+To ensure the sample design reflects the complexity of the population, the stratification incorporates two critical dimensions—**gender** and **fragility**.  
+The prevalence of each typology in the population was used to determine stratum proportions, guaranteeing sufficient representation to detect meaningful differences across groups.
+
+---
+
+### 1  Gender Stratum  
+Within each fragility typology, the sample is further stratified by household gender type, distinguishing between **female-headed** and **male-headed** (80 %) households.  
+Sample sizes are adjusted so that gender-specific subgroups are adequately represented.
+
+### 2  Fragility-Typology Stratum  
+The primary stratum defines **four fragility categories** based on **climate risk** and **conflict** levels.
+
+#### Conflict exposure  
+*Indicators:* number of battles, protests, riots, acts of violence against civilians, and fatalities from these events.  
+A Principal Component Analysis (PCA) is run on these variables, using the median score as the cut-off: departments scoring **above** the median are classified as **high-risk** for violence, while those **below** the median are **low-risk** (see Appendix 1 for details).
+
+#### Climate-risk exposure  
+*Indicators:* water stress in crops and livestock, probability of droughts affecting crops, and probability of droughts affecting livestock.  
+A PCA is conducted using the same median-based classification: departments **above** the median are **high-risk** for climate change, and those **below** are **low-risk** (see Appendix 1).
+
+Based on the two PCAs, we define **four typologies**:
+
+* **Higher Climate Risk & Conflict-Affected**  
+  Departments with climate-risk values above the median **and** high exposure to conflict.
+
+* **Higher Climate Risk & Non-Conflict-Affected**  
+  Departments highly exposed and vulnerable to climate change **but not** affected by conflict.
+
+* **Lower Climate Risk & Conflict-Affected**  
+  Departments less exposed and vulnerable to climate change **but** highly affected by conflict.
+
+* **Lower Climate Risk & Non-Conflict-Affected**  
+  Departments less exposed and vulnerable to climate change **and** not affected by conflict.
