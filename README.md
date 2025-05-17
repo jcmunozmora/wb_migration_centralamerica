@@ -23,7 +23,7 @@ $$
 where
 
 * **n** – required sample size  
-* $$ Z_{\alpha/2}$$ – *z*-score for the desired confidence level  
+* $Z_{\alpha/2}$ – *z*-score for the desired confidence level  
   *In our case we assume 1.96 for 95 % confidence.*  
 * **\(Z_{\beta}\)** – *z*-score for the desired power  
   *We assume 0.84 for 80 % power.*  
