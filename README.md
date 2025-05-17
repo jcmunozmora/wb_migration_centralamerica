@@ -57,7 +57,7 @@ For a single-stage cluster sample with roughly equal cluster sizes, the design e
 
 $$
 \text{DEFF}_{\text{cluster}}
-= 1 + (m - 1)\,\rho ,
+= 1 + (m - 1)*\rho
 $$
 
 where  
@@ -71,10 +71,8 @@ where
 If sampling weights are applied, the overall design effect is the product of the clustering and weighting components:
 
 $$
-\text{DEFF}_{\text{total}} =
-\text{DEFF}_{\text{cluster}}
-\times
-\bigl(1 + \mathrm{CV}_{w}^{2}\bigr),
+\text{DEFF}_{\text{total}} = \text{DEFF}_{\text{cluster}} \times
+\bigl(1 + \mathrm{CV}_{w}^{2}\bigr)
 $$
 
 where $\mathrm{CV}_{w}$ is the coefficient of variation of the final survey weights.
