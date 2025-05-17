@@ -15,23 +15,21 @@ The sample-size calculation is based on the following equation for the two **foo
 ### Binary outcome
 
 $$
-n \;=\; \left(\tfrac{Z_{\alpha}}{2} + Z_{\beta}\right)^{2} \;
-      \frac{ \,p_{1}(1 - p_{1}) + p_{2}(1 - p_{2}) }{ (p_{2} - p_{1})^{2} } \;
+n = \left(\tfrac{Z_{\alpha}}{2} + Z_{\beta}\right)^{2} 
+      \frac{ \,p_{1}(1 - p_{1}) + p_{2}(1 - p_{2}) }{ (p_{2} - p_{1})^{2} } 
       \times \frac{1}{1 - R^{2}}
 $$
 
 where
 
 * **n** – required sample size  
-* **\(Z_{\alpha/2}\)** – *z*-score for the desired confidence level  
+* $$ Z_{\alpha/2}$$ – *z*-score for the desired confidence level  
   *In our case we assume 1.96 for 95 % confidence.*  
 * **\(Z_{\beta}\)** – *z*-score for the desired power  
   *We assume 0.84 for 80 % power.*  
 * **\(p_{1}, p_{2}\)** – proportions for the baseline and expected outcomes, respectively  
 * **MDE** – minimum detectable effect, where \(p_{2} = p_{1} + \text{MDE}\)  
 * **\(R^{2}\)** – proportion of the outcome variance explained by covariates  
-
----
 
 ### Continuous outcome (dietary-diversity score)
 
@@ -47,8 +45,6 @@ where
 
 * **\(\sigma^{2}\)** – adjusted variance,  
   \(\sigma^{2}_{\!z} = \sigma^{2}\bigl(1 - R^{2}\bigr)\)
-
----
 
 ### Clustering and design effect
 
