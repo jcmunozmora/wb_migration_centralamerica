@@ -53,12 +53,11 @@ A key concept in this process is the **Design Effect (DEFF)**, which measures th
 ### Design Effect (DEFF)
 
 The **design effect** compares the variance of an estimator under the actual (cluster) design with the variance that would have been obtained from a simple random sample (SRS) of the same total size.  
-For a single-stage cluster sample with roughly equal cluster sizes, the design effect that captures the loss of efficiency caused by clustering is
+For a single-stage cluster sample with roughly equal cluster sizes, the design effect that captures the loss of efficiency caused by clustering is:
 
 $$
 \text{DEFF}_{\text{cluster}}
-=
-1 + (m - 1)\,\rho ,
+= 1 + (m - 1)\,\rho ,
 $$
 
 where  
@@ -72,8 +71,7 @@ where
 If sampling weights are applied, the overall design effect is the product of the clustering and weighting components:
 
 $$
-\text{DEFF}_{\text{total}}
-=
+\text{DEFF}_{\text{total}} =
 \text{DEFF}_{\text{cluster}}
 \times
 \bigl(1 + \mathrm{CV}_{w}^{2}\bigr),
