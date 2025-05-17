@@ -4,7 +4,17 @@ This the code repository for the project "The complex links between food securit
 
 In this repository there is all the replication codes for the sampling design as well as the analitical analysis.
 
-## Sampling Design
+## Table of Contents
+
+- [Sampling Design - Theory](#sampling-design---theory)
+  - [Binary outcome](#binary-outcome)
+  - [Continuous outcome (dietary-diversity score)](#continuous-outcome-dietary-diversity-score)
+  - [Clustering and design effect](#clustering-and-design-effect)
+    - [Design Effect (DEFF)](#design-effect-deff)
+    - [Accounting for survey weights](#accounting-for-survey-weights)
+- [Sampling Design - Results](#sampling-design---results)
+
+## Sampling Design - Theory
 
 The study uses a robust, multi-stage random sampling approach to examine the relationship between food and nutritional security, migration, and fragility in Northern Central America, specifically in Honduras, Nicaragua, El Salvador, and Guatemala. This design ensures representativeness, accounts for variability across communities, and addresses the specific vulnerabilities of key population subgroups, such as  female-headed households. 
 
@@ -71,8 +81,10 @@ where
 If sampling weights are applied, the overall design effect is the product of the clustering and weighting components:
 
 $$
-\text{DEFF}_{\text{total}} = \text{DEFF}_{\text{cluster}} \times
-\bigl(1 + \mathrm{CV}_{w}^{2}\bigr)
+\text{DEFF}_{\text{total}} = \text{DEFF}_{\text{cluster}} \times \bigl(1 + \mathrm{CV}_{w}^{2}\bigr)
 $$
 
 where $\mathrm{CV}_{w}$ is the coefficient of variation of the final survey weights.
+
+## Sampling Design - Results
+
