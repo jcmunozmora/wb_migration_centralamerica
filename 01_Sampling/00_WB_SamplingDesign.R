@@ -36,8 +36,8 @@ oversample <- 0.1
 r2_values <- list(migration = 0.3, food_insecurity = 0.2, dietary_diversity = 0.3)
 
 # MDE ranges
-migration_mdes <- seq(0.05, 0.10, by = 0.02)
-food_insecurity_mdes <- seq(0.05, 0.15, by = 0.05)
+migration_mdes <- seq(0.02, 0.10, by = 0.02)
+food_insecurity_mdes <- seq(0.06, 0.2, by = 0.02)
 dietary_diversity_mdes <- seq(0.5, 2, by = 0.5)
 
 # Recommended sampling values (for vertical lines in plots)
@@ -46,17 +46,13 @@ food_insecurity_recommended <- 0.1
 dietary_diversity_recommended <- 1
 
 # Baseline values
-migration_base <- 0.43
+migration_base <- 0.35
 food_insecurity_base <- 0.4
 dietary_diversity_sd <- 5
 
 # Gender-specific baseline values
 female_headed_households <- 0.35 # Proportion of female-headed households
 male_headed_households <- 0.65   # Proportion of male-headed households
-
-# Ethnic group-specific baseline values
-indigenous_households <- 0.15  # Proportion of indigenous households
-non_indigenous_households <- 0.85 # Proportion of non-indigenous households
 
 # Fragility typology-specific proportions
 fragility_proportions <- list(

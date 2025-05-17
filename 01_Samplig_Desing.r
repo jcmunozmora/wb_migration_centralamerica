@@ -1,0 +1,143 @@
+############################################
+##  Libraries
+############################################
+library(pwr)      # power & sample–size calculations
+library(dplyr)    # wrangling
+library(ggplot2)  # plotting
+
+############################################
+##  Helper: binary -> Cohen’s h  <->  MDE
+############################################
+h2mde  <- function(h, p1) {                 # convert h  ->  p2 - p1
+  p2 <- (sin(asin(sqrt(p1)) + h / 2))^2
+  return(p2 - p1)
+}
+mde2h  <- function(mde, p1) {               # convert p2 - p1  ->  h
+  p2 <- p1 + mde
+  h  <- abs(2 * asin(sqrt(p1)) - 2 * asin(sqrt(p2)))
+  return(h)
+}
+
+############################################
+##  (1)  Binary outcome ––––––––––––––––––
+##  given N_total  ->  smallest MDE
+############################################
+binary_mde <- function(p1,                    # baseline prevalence
+                       N_total,              # TOTAL obs. you can afford
+                       alpha  = .05,
+                       power  = .80,
+                       r2     = 0,           # R² of covariates
+                       oversample = 0.10,
+                       tol    = 1e-4) {
+
+  ## 1. translate TOTAL N  ->  *per-group* n used by pwr.2p.test()
+  N_eff   <- N_total / (1 + oversample)      # remove oversampling inflation
+  n_per_g <- (N_eff * (1 - r2)) / 2          # undo the R² adjustment + 2-groups
+
+  ## 2. monotone link   MDE  ->  power
+  f <- function(h) pwr.2p.test(h = h,
+                               n = n_per_g,
+                               sig.level = alpha)$power - power
+
+  ## 3. find h that makes  f(h) = 0
+  h_star <- uniroot(f, interval = c(1e-6, 5))$root   # h can never exceed ~3.3
+
+  ## 4. convert h*  ->  MDE
+  return(h2mde(h_star, p1))
+}
+
+############################################
+##  (2)  Continuous outcome ––––––––––––––
+##  given N_total  ->  smallest MDE
+############################################
+continuous_mde <- function(sd,
+                           N_total,
+                           alpha  = .05,
+                           power  = .80,
+                           r2     = 0,
+                           oversample = 0.10) {
+
+  N_eff <- N_total / (1 + oversample)        # remove oversampling inflation
+  n_per_g <- (N_eff * (1 - r2)) / 2
+
+  ## Find Cohen’s d that reaches the target power
+  f <- function(d) pwr.t.test(d = d,
+                              n = n_per_g,
+                              sig.level = alpha,
+                              type = "two.sample")$power - power
+
+  d_star <- uniroot(f, interval = c(1e-4, 5))$root
+  return(d_star * sd)                        # MDE on the original scale
+}
+
+############################################
+##  PARAMETERS
+############################################
+alpha  <- 0.05
+power  <- 0.80
+overs  <- 0.10
+
+p1_migration       <- 0.35
+p1_food_insecurity <- 0.40
+sd_diet_div        <- 5
+
+r2s <- list(migration        = 0.30,
+            food_insecurity  = 0.20,
+            diet_diversity   = 0.30)
+
+## Candidate TOTAL sample sizes you want to “try out”
+N_grid <- seq( 600,  3000, by = 100)   # adapt as needed
+
+############################################
+##  RUN THE “WHAT-IF” GRID
+############################################
+out <- tibble(
+  N_total = rep(N_grid, 3),
+  Outcome = rep(c("Migration Intention",
+                  "Food Insecurity",
+                  "Dietary Diversity"),
+                each = length(N_grid))
+) %>%
+  rowwise() %>%
+  mutate(
+    MDE = case_when(
+      Outcome == "Migration Intention" ~ 
+        binary_mde(p1_migration, N_total, alpha, power,
+                   r2 = r2s$migration, oversample = overs),
+      Outcome == "Food Insecurity" ~ 
+        binary_mde(p1_food_insecurity, N_total, alpha, power,
+                   r2 = r2s$food_insecurity, oversample = overs),
+      Outcome == "Dietary Diversity" ~ 
+        continuous_mde(sd_diet_div, N_total, alpha, power,
+                       r2 = r2s$diet_diversity, oversample = overs)
+    )
+  ) %>%
+  ungroup()
+
+############################################
+##  PLOT:  MDE  vs  TOTAL N
+############################################
+ggplot(out, aes(x = N_total, y = MDE, colour = Outcome)) +
+  geom_line(size = 1) +
+  facet_wrap(~ Outcome, scales = "free_y", ncol = 3) +
+  theme_minimal(base_size = 10) +
+  labs(x = "Total Sample Size (incl. oversampling)",
+       y = "Minimum Detectable Effect (MDE)",
+       colour = NULL)
+
+ggsave("img/WB_MDE_vs_N.png",
+       width = 6, height = 4, dpi = 300, units = "in")
+
+############################################
+##  EXAMPLE:  What MDE do we get if we can
+##            survey exactly 2,000 HH?
+############################################
+example_N <- 1600
+list(
+  Mig_MDE  = binary_mde(p1_migration, example_N, alpha, power,
+                        r2s$migration, overs),
+  Food_MDE = binary_mde(p1_food_insecurity, example_N, alpha, power,
+                        r2s$food_insecurity, overs),
+  DDS_MDE  = continuous_mde(sd_diet_div, example_N, alpha, power,
+                            r2s$diet_diversity, overs)
+)
