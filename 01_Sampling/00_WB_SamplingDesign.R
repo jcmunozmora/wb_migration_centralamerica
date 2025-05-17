@@ -5,14 +5,15 @@ library(dplyr)
 
 # Function to calculate binary outcome sample size
 binary_sample_size <- function(p1, p2, alpha, power, r2, oversample) {
-  delta <- abs(p1 - p2)
+  # Calcular Cohen's h utilizando la fórmula correcta
+  h <- abs(2 * asin(sqrt(p1)) - 2 * asin(sqrt(p2)))
   tryCatch({
-    n_unadj <- pwr.2p.test(h = delta / sqrt(p1 * (1 - p1)), sig.level = alpha, power = power)$n
-    n_adj <- n_unadj / (1 - r2) # Adjust for covariates
-    n_total <- n_adj * (1 + oversample) # Oversample
+    n_unadj <- pwr.2p.test(h = h, sig.level = alpha, power = power)$n
+    n_adj <- n_unadj / (1 - r2) # Ajuste por covariables
+    n_total <- n_adj * (1 + oversample) # Sobremuestreo
     return(ceiling(n_total))
   }, error = function(e) {
-    return(NA) # Return NA if calculation fails
+    return(NA) # Retorna NA si falla el cálculo
   })
 }
 
@@ -35,7 +36,7 @@ oversample <- 0.1
 r2_values <- list(migration = 0.3, food_insecurity = 0.2, dietary_diversity = 0.3)
 
 # MDE ranges
-migration_mdes <- seq(0.05, 0.15, by = 0.02)
+migration_mdes <- seq(0.05, 0.10, by = 0.02)
 food_insecurity_mdes <- seq(0.05, 0.15, by = 0.05)
 dietary_diversity_mdes <- seq(0.5, 2, by = 0.5)
 
