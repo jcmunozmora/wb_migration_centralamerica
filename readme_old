@@ -4,6 +4,7 @@ This the code repository for the project "The complex links between food securit
 
 analytical pipelines.
 
+```text
 repo/
 ├── code/
 │   └── R/
@@ -14,6 +15,7 @@ repo/
 │   └── derived/               # simulation outputs
 ├── img/                       # auto‑generated figures
 └── README.md                  # you are here
+```
 
 ---
 ## Table of Contents
