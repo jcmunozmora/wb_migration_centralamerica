@@ -86,12 +86,12 @@ $$
 
 where $\mathrm{CV}_{w}$ is the coefficient of variation of the final survey weights.
 
+---
+
 ## Incorporation of Fragility and Gender Strata
 
 To ensure the sample design reflects the complexity of the population, the stratification incorporates two critical dimensions—**gender** and **fragility**.  
 The prevalence of each typology in the population was used to determine stratum proportions, guaranteeing sufficient representation to detect meaningful differences across groups.
-
----
 
 ### 1  Gender Stratum  
 Within each fragility typology, the sample is further stratified by household gender type, distinguishing between **female-headed** and **male-headed** (80 %) households.  
@@ -121,3 +121,31 @@ Based on the two PCAs, we define **four typologies**:
 
 * **Lower Climate Risk & Non-Conflict-Affected**  
   Departments less exposed and vulnerable to climate change **and** not affected by conflict.
+
+---
+
+## Sampling design -- Results
+
+### Sample size 
+
+To ensure a robust and representative sampling design, baseline values were derived from existing evidence on key outcomes in Northern Central America. These values serve as essential parameters for estimating sample sizes that reflect the region’s complex socio-economic and environmental dynamics. By guiding the Minimum Detectable Effects (MDEs) calculation for each outcome, these baseline values ensure that the sample size is adequate to detect meaningful differences across critical strata, such as fragility typologies, and gender. This evidence-based approach strengthens the reliability and validity of the sampling design, ensuring it is closely aligned with the realities and diversity of the target. The table below summarizes the key baseline values for the sampling process.
+
+
+Given numerous unobservable factors, the sampling design integrates existing evidence on the explanatory power of key covariates for the selected outcome variables. To achieve this, relevant literature and studies were reviewed to identify the contributions of household-level and geographical covariates to the outcomes of interest. These covariates typically include household head characteristics, such as age, gender, education, employment status, and regional and community-level fixed effects. Incorporating these controls enhances the sampling design by addressing potential confounding variables, thereby ensuring that the model's explanatory power is robust and reflective of the diverse contexts within Northern Central America. The table below provides a summary of these considerations.
+
+### Table 1. Baseline Values and Data Sources for Sampling Design
+
+| **Type** | **Variable / Dimension** | **Notes / Source** | **Value<br>(× 100 %)** |
+|----------|-------------------------|--------------------|------------------------|
+| **Outcome** | Proportion of households reporting migration intention *(binary)* | Several studies examine the desire to migrate; the most recent regional report excludes Nicaragua. — *International Organization for Migration (IOM), 2022* | **0.35** |
+| **Outcome** | Proportion of households reporting food insecurity *(binary)* | Literature reports different prevalence rates.<br>Reference values used in this estimation:<br>&nbsp;&nbsp;• Guatemala – 41 % (Deza & Ruiz-Arranz, 2022)<br>&nbsp;&nbsp;• Honduras – 39 % (Deza & Ruiz-Arranz, 2022)<br>&nbsp;&nbsp;• El Salvador – 52 % (Deza & Ruiz-Arranz, 2022)<br>&nbsp;&nbsp;• Dry Corridor (GT, HN, SV) – 43 % (WFP, 2017) | **0.41** *(average)* |
+| **Outcome** | Average dietary-diversity score *(continuous)* | No systematic regional study. Evidence links food insecurity with low dietary diversity.<br>Reference: mean score = **5.6** in eight Latin-American countries (Argentina, Brazil, Chile, Colombia, Costa Rica, Ecuador, Peru, Venezuela) — *Gómez et al., 2019* | **5.0** *(average)* |
+| **Stratum** | Proportion of female-headed households | Estimates suggest **30 – 40 %** of households in Central America are female-headed. | **0.35** |
+| **Stratum** | Proportion of households living in fragile **Type I** areas – high climate risk **and** high conflict-affected levels | — | **0.38** |
+| **Stratum** | Proportion of households living in fragile **Type II** areas – high climate risk and **high** conflict-affected levels | Own calculation based on **LandScan Global Population Database (2024)** | **0.11** |
+| **Stratum** | Proportion of households living in fragile **Type III** areas – low climate risk **and** high conflict-affected levels | — | **0.40** |
+| **Stratum** | Proportion of households living in fragile **Type IV** areas – low climate risk **and** low conflict-affected levels | — | **0.11** |
+
+Once the sampling size is defined, the following decision is the composition of the number of villages and households. The optimal number of villages in the sampling design is determined by balancing statistical power and logistical feasibility. To achieve this, the design minimizes the design effect—a factor that reduces the effective sample size due to intra-cluster correlation (ICC). The trade-off lies between the number of clusters and the number of households per cluster: fewer clusters with more households increase ICC effects, reducing statistical efficiency, while more clusters with fewer households mitigate these effects but increase logistical complexity and costs. The optimal cluster size is reached when the effective sample size is maximized, and the benefits of adding more clusters begin to show diminishing returns. Practical considerations, such as field costs, accessibility of villages, and survey feasibility, further refine this balance. Simulations based on the study's parameters help identify this optimal point, ensuring robust statistical inference and operational efficiency. In most studies with moderate ICC (e.g., 0.05–0.15), the number of households per cluster typically ranges between 10 and 20, with the total number of clusters adjusted based on the overall sample size and stratification requirements.
+
+### Sampling strategy
