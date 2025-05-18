@@ -313,6 +313,58 @@ This end-to-end process enables researchers to both simulate and visualize the i
 
 ---
 
+## Sampling selection 
+
+[03a_Sampling_Optimal_Clusters_analitica.r](code/R/03a_Sampling_Optimal_Clusters_analitica.r) script simulates and evaluates various cluster sampling designs to find the optimal configuration under conservative assumptions. It balances statistical power and logistical feasibility by considering factors such as the number of households per cluster (`m`), intra-cluster correlation (`icc`), and the minimum detectable effect (MDE), while ensuring that the design remains within a preset budget.
+
+### Key Components
+
+1. **Parameter Setup**
+   - **Design Parameters:**  
+     The script defines grids for:
+     - `m_grid`: A sequence for the number of households per cluster (e.g., 10 to 15).
+     - `icc_grid`: Pre-specified values for intra-cluster correlation (e.g., 0.03, 0.05, 0.06).
+     - `mde_grid`: Candidate MDE (minimum detectable effect) values (e.g., 0.10, 0.12, 0.15).
+   - **Global Settings:**  
+     - `alpha` is set to 0.05.
+     - `pow_target` (target power) is 0.80.
+     - `budget_limit` is defined (in this example, 1900 interviews maximum).
+     - `p0` is the baseline prevalence (set to 0.40).
+   - **Stratum Targets:**  
+     The script reads data from an Excel file (`variables_A3.xls`) and computes population weights by stratum. These weights are then used to derive stratum-specific targets (total sample sizes) that may differ across groups such as _high_conflict_, _low_conflict_, _high_non_conflict_, and _low_non_conflict_.
+
+2. **Power Calculation Function**
+   - The function `power_clu()` is defined to calculate the statistical power for a given design. It:
+     - Computes the effect size using the difference between a baseline prevalence (`p0`) and an alternative prevalence (adjusted by `mde`).
+     - Adjusts for clustering by calculating a design effect (`deff`).
+     - Uses these components to compute an estimated power via a normal approximation.
+
+3. **Simulation (Grid Search)**
+   - The script generates a grid of possible design configurations using `expand_grid()` over `m_grid`, `icc_grid`, and `mde_grid`.
+   - For each stratum (using the `targets` vector), it iteratively increases the number of clusters (`k`) until the design achieves at least the target power or the design exceeds the budget.
+   - The simulation results are combined into a data frame (`results`) that contains:
+     - `n_design`: The total sample size (calculated as `k` × `m`).
+     - The achieved `power` for each configuration.
+     - A boolean flag (`within_budget`) indicating whether the design meets the budget constraint.
+     - The corresponding `Stratum` label.
+
+4. **Optimal Design Extraction**
+   - From the grid results, the script extracts the optimal design for each stratum (`opt_designs`) — the design with the smallest total sample size that satisfies both power (≥ 0.80) and budget constraints.
+
+5. **Visualization**
+   - **Scatter Plot:**  
+     The script creates a scatter plot (with `ggplot2`) that visualizes the relationship between the total sample size (`n_design`) and power. Key features include:
+     - A horizontal line at the target power (`pow_target`) and a vertical line at the budget limit.
+     - Points showing the simulated designs, colored based on whether they are within the budget.
+     - Optimal designs (from `opt_designs`) are annotated with a text label showing the final number of interviews (`n_design`) along with the values of `k` (number of clusters) and `m` (households per cluster).
+     - The plot is facetted by `Stratum` to display designs for different population groups.
+   - **Saving the Plot:**  
+     The final plot is saved as a PNG file (`img/power_scatter_budget_ICC05_optDesigns.png`).
+
+![Selected municipalites](img/selected_municipalities_map.png)
+
+---
+
 ## Authors
 
 - **[Juan Carlos Muñoz-Mora]** – PI
