@@ -6,6 +6,8 @@ This the code repository for the project "The complex links between food securit
 
 ## Table of Contents
 
+## Table of Contents
+
 - [Overview](#overview)
 - [Repository Structure](#repository-structure)
 - [Sampling Design - Theory](#sampling-design---theory)
@@ -21,6 +23,11 @@ This the code repository for the project "The complex links between food securit
     - [Conflict Exposure](#conflict-exposure)
     - [Climate‑risk Exposure](#climate-risk-exposure)
     - [Defined Typologies](#defined-typologies)
+- [Code Descriptions](#code-descriptions)
+  - [01_Sample_Size_MDE.r](#01_sample_size_mde)
+  - [03_Sampling_Optimal_Clusters.r](#03_sampling_optimal_clusters)
+  - [04_randomize_municipalities.R](#04_randomize_municipalities)
+  - [test.r](#testr)
 - [Sampling Design -- Results](#sampling-design--results)
   - [Baseline Values](#baseline-values)
   - [Table 1. Baseline Values and Data Sources for Sampling Design](#table-1-baseline-values-and-data-sources-for-sampling-design)
@@ -36,15 +43,16 @@ This the code repository for the project "The complex links between food securit
 repo/
 ├── code/
 │   └── R/
-│       ├── 01_Sample_Size_MDE.r         # Fixed‑budget → MDE calculations and power simulations
-│       ├── 03_Sampling_Optimal_Clusters.r # Optimal clustering design for sampling
-│       ├── 04_randomize_municipalities.R  # Random selection of municipalities by typology
-│       └── test.r                       # Auxiliary scripts and tests
+│       ├── 01_Sample_Size_MDE.r         # Sample size calculations, MDE simulations, and power analysis for binary and continuous outcomes
+│       ├── 03_Sampling_Optimal_Clusters.r # Simulations for optimal clustering design to balance statistical power and logistical feasibility
+│       ├── 04_randomize_municipalities.R  # Random selection of municipalities by typology, including stratified sampling based on fragility and gender
+│       └── test.r                        # Auxiliary scripts and tests
 ├── data/
-│   ├── inputs/                         # Baseline rates, ICC priors, covariate R², etc.
-│   └── derived/                        # Simulation outputs and selected sample lists
-├── img/                                # Generated figures and maps
-└── README.md    
+│   ├── inputs/                         # Raw input data (e.g., shapefiles, baseline rates, ICC priors, covariate R²)
+│   └── derived/                        # Processed datasets, simulation outputs, and selected sample lists
+├── img/                                # Generated figures, maps, and visualizations (e.g., WB_MDE_vs_N.png)
+├── docs/                               # Documentation, supplementary materials, and additional project reports
+└── README.md                           # Overview of the project, methodology, and repository contents  
 ```
 ---
 
@@ -245,7 +253,7 @@ We conclude that an optimal sample size will be **1800** households for the four
 * **Lower Climate Risk & Conflict‑Affected**: 536
 * **Lower Climate Risk & Non‑Conflict‑Affected**: 384
 
-This code is implemented using the [Contribution guidelines for this project](code/R/01_Sample_Size_MDE.r). This script calculates the Minimum Detectable Effect (MDE) for both binary and continuous outcomes, using power analysis methods. It also visualizes the relationship between total sample size and MDE, and provides example calculations and population distribution by stratification. The workflow is divided into several key steps:
+This code is implemented using the [01_Sample_Size_MDE.r](code/R/01_Sample_Size_MDE.r). This script calculates the Minimum Detectable Effect (MDE) for both binary and continuous outcomes, using power analysis methods. It also visualizes the relationship between total sample size and MDE, and provides example calculations and population distribution by stratification. The workflow is divided into several key steps:
 
 ### 1. Libraries and Helper Functions
 - **Libraries:**  

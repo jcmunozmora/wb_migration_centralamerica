@@ -17,18 +17,22 @@ var <- var |> group_by(cat_2) |> summarise(n_p=sum(poblacion,na.rm=TRUE)) |>
 print(var)
 
 ## ---------- PARAMETERS  ----------------------------------------
-targets <- c(high_conflict = var$n[var$cat_2=="high - high"],
-             low_conflict  = var$n[var$cat_2=="low - high"],
-             high_non_conflict = var$n[var$cat_2=="high - low"],
-             low_non_conflict  = var$n[var$cat_2=="low - low"])
+## ---- (OPTIONAL) bigger small strata  --------------------------------------
+targets <- c(
+  high_conflict     = var$n[var$cat_2=="high - high"],
+  low_conflict      = var$n[var$cat_2=="low - high"],
+  high_non_conflict = max(400, var$n[var$cat_2=="high - low"]), # was ≈250
+  low_non_conflict  = max(400, var$n[var$cat_2=="low - low"])   # was ≈220
+)
+
 
 p1_vec   <- rep(0.40, length(targets))
 m_grid   <- 5:10                     #  Number of households per cluster
-icc_grid <- c(0.04, 0.06, 0.08)      # test three ICC values
+icc_grid <- c(0.04, 0.06)      # test three ICC values
 mde_grid <- c(0.08, 0.10, 0.12)      # test three effect sizes
 nrep     <- 800                      # Monte-Carlo reps
 alpha    <- 0.05
-analysis <- "glmm"                   # "glmm" or "tmean"
+analysis <- "tmean"                   # "glmm" or "tmean"
 ## ---------------------------------------------------------------------------
 
 ## ---------- simulator ------------------------------------------------------
