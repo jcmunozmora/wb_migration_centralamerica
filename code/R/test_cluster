@@ -1,0 +1,138 @@
+###############################################################################
+## 0.  Packages & parallel back-end
+###############################################################################
+library(dplyr)
+library(ggplot2)
+library(pbapply)      # progress bar
+library(future.apply) # parallel replicate
+plan(multisession, workers = parallel::detectCores() - 1)
+pboptions(type = "txt")
+
+###############################################################################
+## 1.  Clustered-binary simulator
+###############################################################################
+sim_one <- function(k, m, icc, p1, mde) {
+
+  if (k < 2) stop("Need at least 2 clusters")
+
+  ## balanced assignment (⌊k/2⌋ vs ⌈k/2⌉)
+  arm <- sample(rep(0:1, c(floor(k/2), ceiling(k/2))))
+
+  ## random intercept SD from ICC
+  sigma_b <- sqrt(icc * (pi^2 / 3) / (1 - icc))
+  b       <- rnorm(k, 0, sigma_b)
+
+  ## per-cluster probabilities
+  p_ctrl <- plogis(qlogis(p1)        + b)
+  p_trt  <- plogis(qlogis(p1 + mde)  + b)
+  prob_k <- ifelse(arm == 0, p_ctrl, p_trt)
+
+  outcome <- rbinom(k * m, 1, rep(prob_k, each = m))
+
+  data.frame(
+    cluster = rep(seq_len(k), each = m),
+    treat   = rep(arm,        each = m),
+    outcome = outcome
+  )
+}
+
+###############################################################################
+## 2.  Empirical power for (k, m) using a cluster-mean t-test
+###############################################################################
+power_km <- function(k, m, icc, p1, mde,
+                     nrep = 1000, alpha = 0.05) {
+
+  hits <- future_replicate(nrep, {
+    dat <- sim_one(k, m, icc, p1, mde)
+
+    clu <- dat %>%
+      group_by(cluster, treat) %>%
+      summarise(prop = mean(outcome), .groups = "drop")
+
+    if (length(unique(clu$treat)) < 2) return(NA_real_)   # skip rare bad draw
+
+    pval <- tryCatch(
+      t.test(prop ~ factor(treat), data = clu)$p.value,
+      error = function(e) NA_real_
+    )
+    as.numeric(!is.na(pval) && pval < alpha)
+  }, future.seed = TRUE)
+
+  mean(hits, na.rm = TRUE)
+
+
+###############################################################################
+## 3.  Design parameters (edit as needed)
+###############################################################################
+targets <- c(
+  high_conflict     = 608,
+  high_non_conflict = 352,   # was 176
+  low_conflict      = 640,
+  low_non_conflict  = 352    # was 176
+)
+
+icc_vec <- rep(0.06, 4)                    # same ICC for now
+names(icc_vec) <- names(targets)
+
+p1_vec  <- rep(0.40, 4)                    # baseline prevalence
+mde_vec <- rep(0.08, 4)                    # detectable effect (8 pp)
+
+m_grid  <- 7:12                            # households per cluster
+
+###############################################################################
+## 4.  Grid search with a progress bar over *m*
+###############################################################################
+all_results <- lapply(names(targets), function(stratum) {
+
+  N_tot <- targets[stratum]
+  rho   <- icc_vec[stratum]
+  p1    <- p1_vec[stratum]
+  mde   <- mde_vec[stratum]
+
+  pblapply(m_grid, function(m) {           # progress for every *m*
+    k <- ceiling(N_tot / m)
+    tibble(
+      m        = m,
+      k        = k,
+      n_design = k * m,
+      power    = power_km(k, m, rho, p1, mde,
+                          nrep = 1000, alpha = .05),
+      Stratum  = stratum
+    )
+  }) %>% bind_rows()
+}) %>% bind_rows()
+
+###############################################################################
+## 5.  Choose design with ≥ 0.80 power & least interviews
+###############################################################################
+design_opt <- all_results %>%
+  filter(power >= 0.80) %>%
+  group_by(Stratum) %>%
+  slice_min(n_design, n = 1, with_ties = FALSE) %>%
+  ungroup()
+
+print(design_opt)
+
+###############################################################################
+## 6.  Visual summary
+###############################################################################
+ggplot(all_results, aes(m, n_design, colour = Stratum)) +
+  geom_line(alpha = 0.5) +
+  geom_point(alpha = 0.6) +
+  geom_point(data = design_opt, aes(m, n_design),
+             colour = "red", size = 4) +
+  facet_wrap(~ Stratum, scales = "free_y") +
+  labs(title = "Households vs. cluster size — power ≥ 80 % highlighted",
+       x = "Households per cluster (m)",
+       y = "Total interviews (n_design)") +
+  theme_minimal(base_size = 12)
+
+ggsave("img/Sampling_Optimal_Clusters.png",
+       width = 10, height = 6, dpi = 300)
+
+###############################################################################
+## 7.  (Optional) save table
+###############################################################################
+# openxlsx::write.xlsx(design_opt,
+#                      "data/derived/optimal_design.xlsx",
+#                      overwrite = TRUE)

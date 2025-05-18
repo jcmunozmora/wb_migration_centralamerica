@@ -134,27 +134,40 @@ write.csv(out, file = "data/derived/mde_grid.csv", row.names = FALSE)
 ############################################
 ##  PLOT:  MDE  vs  TOTAL N
 ############################################
+n_sample <- 1800
+
 example <- tibble(
   Outcome = c("Migration Intention", "Food Insecurity", "Dietary Diversity"),
   MDE_example = c(
-    binary_mde(p1_migration, 1600, alpha, power, r2s$migration, overs),
-    binary_mde(p1_food_insecurity, 1600, alpha, power, r2s$food_insecurity, overs),
-    continuous_mde(sd_diet_div, 1600, alpha, power, r2s$diet_diversity, overs)
+    binary_mde(p1_migration, n_sample, alpha, power, r2s$migration, overs),
+    binary_mde(p1_food_insecurity, n_sample, alpha, power, r2s$food_insecurity, overs),
+    continuous_mde(sd_diet_div, n_sample, alpha, power, r2s$diet_diversity, overs)
   )
 )
+
+# Calcular para cada Outcome la mediana de MDE para ubicar la etiqueta en el centro
+label_data <- out %>%
+  group_by(Outcome) %>%
+  summarize(y_med = median(MDE)+median(MDE)*0.4, .groups = "drop") %>%
+  mutate(x = n_sample,
+         label = paste("n =", n_sample))
 
 # Graficar el MDE versus el tamaño total de la muestra
 ggplot(out, aes(x = N_total, y = MDE, colour = Outcome)) +
   geom_line(size = 1) +
-  geom_vline(xintercept = 1600, linetype = "dashed", color = "black") +
+  geom_vline(xintercept = n_sample, linetype = "dashed", color = "black") +
+  # Ubica la etiqueta en el centro del rango de MDE por Outcome
+  geom_text(data = label_data, 
+            aes(x = x, y = y_med, label = label), 
+            angle = 90, vjust = -0.5, color = "black") +
   geom_hline(data = example, aes(yintercept = MDE_example, colour = Outcome), 
              linetype = "dashed", size = 0.8) +
   geom_text(data = example, 
-            aes(x = 1600, y = MDE_example, 
+            aes(x = n_sample, y = MDE_example, 
                 label = round(MDE_example, 2), colour = Outcome),
             vjust = -0.5, hjust = 0, size = 3) +
   facet_wrap(~ Outcome, scales = "free_y", ncol = 3) +
-  theme_minimal(base_size = 10) +
+  theme_minimal(base_size = 12) +
   theme(legend.position = "bottom") +
   labs(x = "Total Sample Size (incl. oversampling)",
        y = "Minimum Detectable Effect (MDE)",
@@ -163,20 +176,25 @@ ggplot(out, aes(x = N_total, y = MDE, colour = Outcome)) +
 ggsave("img/WB_MDE_vs_N.png",
        width = 10, height = 4, dpi = 300, units = "in")
 
+
+## ---------- Get the distribution  ----------------------------------------
+library(readxl)
+var <- read_excel("data/derived/variables_A3.xls")
+var <- var |> group_by(cat_2) |> summarise(n_p=sum(poblacion,na.rm=TRUE)) |>
+             mutate(n_p = n_p/sum(n_p),n=round(n_p*n_sample))
+
+print(var)
+
 ############################################
 ##  EXAMPLE:  What MDE do we get if we can
 ##            survey exactly 2,000 HH?
 ############################################
-example_N <- 1600
 list(
-  Mig_MDE  = binary_mde(p1_migration, example_N, alpha, power,
+  Mig_MDE  = binary_mde(p1_migration, n_sample, alpha, power,
                         r2s$migration, overs),
-  Food_MDE = binary_mde(p1_food_insecurity, example_N, alpha, power,
+  Food_MDE = binary_mde(p1_food_insecurity, n_sample, alpha, power,
                         r2s$food_insecurity, overs),
-  DDS_MDE  = continuous_mde(sd_diet_div, example_N, alpha, power,
+  DDS_MDE  = continuous_mde(sd_diet_div, n_sample, alpha, power,
                             r2s$diet_diversity, overs)
 )
 
-# Estimar el número de observaciones por fragilidad (redondeado)
-obs_by_fragility <- sapply(fragility_proportions, function(prop) round(prop * example_N))
-print(obs_by_fragility)

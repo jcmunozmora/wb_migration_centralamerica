@@ -237,12 +237,12 @@ The simulation results were visualized to show how sample size changes with MDE 
 
 ![WB MDE vs M](img/WB_MDE_vs_N.png)
 
-We conclude that an optimal sample size will be **1600** households for the four typologies are defined:
+We conclude that an optimal sample size will be **1800** households for the four typologies are defined:
 
-* **Higher Climate Risk & Conflict‑Affected**: 608
-* **Higher Climate Risk & Non‑Conflict‑Affected**: 176 
-* **Lower Climate Risk & Conflict‑Affected**: 640
-* **Lower Climate Risk & Non‑Conflict‑Affected**: 176
+* **Higher Climate Risk & Conflict‑Affected**: 527
+* **Higher Climate Risk & Non‑Conflict‑Affected**: 353 
+* **Lower Climate Risk & Conflict‑Affected**: 536
+* **Lower Climate Risk & Non‑Conflict‑Affected**: 384
 
 ---
 
