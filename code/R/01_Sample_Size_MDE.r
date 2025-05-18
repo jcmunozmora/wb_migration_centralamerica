@@ -46,6 +46,18 @@ binary_mde <- function(p1,                    # baseline prevalence
   return(h2mde(h_star, p1))
 }
 
+# Primary strata: Fragility typology-specific proportions
+
+fragility_proportions <- list(
+  high_conflict = 0.38,
+  high_non_conflict = 0.11,
+  low_conflict = 0.40,
+  low_non_conflict = 0.11
+)
+
+# Secondary strata: Gender and Ethnic group-specific proportions
+female_headed_households <- 0.35
+
 ############################################
 ##  (2)  Continuous outcome ––––––––––––––
 ##  given N_total  ->  smallest MDE
@@ -164,3 +176,7 @@ list(
   DDS_MDE  = continuous_mde(sd_diet_div, example_N, alpha, power,
                             r2s$diet_diversity, overs)
 )
+
+# Estimar el número de observaciones por fragilidad (redondeado)
+obs_by_fragility <- sapply(fragility_proportions, function(prop) round(prop * example_N))
+print(obs_by_fragility)

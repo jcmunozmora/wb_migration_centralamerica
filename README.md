@@ -2,43 +2,48 @@
 
 This the code repository for the project "The complex links between food security, migration, and fragility and violence in Northern Central America". The World Bank, with support from the State and Peacebuilding Fund (SPF), is undertaking an analytical study to explore the intricate links between food security, migration, and fragility in NCA. This study aims to generate robust data and insights for regional and country-specific strategies. 
 
-analytical pipelines.
+## Repository Structure
 
 ```text
 repo/
 ├── code/
 │   └── R/
-│       ├── 01_Sample_Size_MDE.r    # fixed‑budget → MDE calculations
-│       ├──  …                 # helper scripts (cleaning, plots, etc.)
+│       ├── 01_Sample_Size_MDE.r         # Fixed‑budget → MDE calculations and power simulations
+│       ├── 03_Sampling_Optimal_Clusters.r # Optimal clustering design for sampling
+│       ├── 04_randomize_municipalities.R  # Random selection of municipalities by typology
+│       └── test.r                       # Auxiliary scripts and tests
 ├── data/
-│   ├── inputs/                # baseline rates, ICC priors, covariate R²
-│   └── derived/               # simulation outputs
-├── img/                       # auto‑generated figures
-└── README.md                  # you are here
+│   ├── inputs/                         # Baseline rates, ICC priors, covariate R², etc.
+│   └── derived/                        # Simulation outputs and selected sample lists
+├── img/                                # Generated figures and maps
+└── README.md    
 ```
 
 ---
 
 ## Table of Contents
 
+- [Overview](#overview)
+- [Repository Structure](#repository-structure)
 - [Sampling Design - Theory](#sampling-design---theory)
   - [Fixed‑Sample‑Size → Minimum Detectable Effect](#fixed-sample-size--minimum-detectable-effect)
-  - [Binary outcome](#binary-outcome)
-  - [Continuous outcome (dietary‑diversity score)](#continuous-outcome-dietary-diversity-score)
-  - [Clustering and design effect](#clustering-and-design-effect)
+    - [Binary Outcome](#binary-outcome)
+    - [Continuous Outcome (Dietary‑diversity Score)](#continuous-outcome-dietary-diversity-score)
+  - [Clustering and Design Effect](#clustering-and-design-effect)
     - [Design Effect (DEFF)](#design-effect-deff)
-    - [Accounting for survey weights](#accounting-for-survey-weights)
+    - [Accounting for Survey Weights](#accounting-for-survey-weights)
 - [Incorporation of Fragility and Gender Strata](#incorporation-of-fragility-and-gender-strata)
   - [Gender Stratum](#gender-stratum)
   - [Fragility‑Typology Stratum](#fragility-typology-stratum)
-    - [Conflict exposure](#conflict-exposure)
-    - [Climate‑risk exposure](#climate-risk-exposure)
+    - [Conflict Exposure](#conflict-exposure)
+    - [Climate‑risk Exposure](#climate-risk-exposure)
     - [Defined Typologies](#defined-typologies)
-- [Sampling design -- Results](#sampling-design--results)
-  - [Baseline values](#baseline-values)
+- [Sampling Design -- Results](#sampling-design--results)
+  - [Baseline Values](#baseline-values)
   - [Table 1. Baseline Values and Data Sources for Sampling Design](#table-1-baseline-values-and-data-sources-for-sampling-design)
   - [Table 2. Explanatory Power of Covariates](#table-2-explanatory-power-of-covariates)
-  - [Power calculation](#power-calculation)
+  - [Power Calculation](#power-calculation)
+- [Appendix / Supplementary Material](#appendix--supplementary-material)
 
 ---
 
@@ -141,6 +146,34 @@ where $\text{CV}_{w}$ is the coefficient of variation of the final weights.
 
 ---
 
+## Incorporation of Fragility and Gender Strata
+
+To ensure the sample design reflects the complexity of the population, the stratification incorporates two key dimensions—**gender** and **fragility**.  
+The prevalence of each typology in the population was used to determine stratum proportions, guaranteeing sufficient representation to detect meaningful differences across groups.
+
+### 1. Gender Stratum  
+Within each fragility typology, the sample is further stratified by household gender type, distinguishing between **female-headed** and **male-headed** households. Sample sizes are adjusted so that gender‑specific subgroups are adequately represented.
+
+### 2. Fragility‑Typology Stratum  
+The primary stratum defines **four fragility categories** based on **climate risk** and **conflict** levels.
+
+#### Conflict exposure  
+*Indicators:* number of battles, protests, riots, acts of violence against civilians, and fatalities. A PCA is run on these variables, using the median as a cut-off. Departments above the median are classified as **high‑risk**; below, as **low‑risk**.
+
+#### Climate‑risk exposure  
+*Indicators:* water stress, probability of droughts affecting crops and livestock. Similar median‑based PCA classifies departments as **high‑risk** or **low‑risk**.
+
+Based on both PCAs, four typologies are defined:
+
+* **Higher Climate Risk & Conflict‑Affected**  
+* **Higher Climate Risk & Non‑Conflict‑Affected**  
+* **Lower Climate Risk & Conflict‑Affected**  
+* **Lower Climate Risk & Non‑Conflict‑Affected**
+
+![WB MDE vs M](img/mapa_grupo_total_A3.png)
+
+---
+
 ## Sampling design -- Results
 
 ### Baseline values
@@ -204,30 +237,15 @@ The simulation results were visualized to show how sample size changes with MDE 
 
 ![WB MDE vs M](img/WB_MDE_vs_N.png)
 
----
+We conclude that an optimal sample size will be **1600** households for the four typologies are defined:
 
-## Incorporation of Fragility and Gender Strata
-
-To ensure the sample design reflects the complexity of the population, the stratification incorporates two key dimensions—**gender** and **fragility**.  
-The prevalence of each typology in the population was used to determine stratum proportions, guaranteeing sufficient representation to detect meaningful differences across groups.
-
-### 1. Gender Stratum  
-Within each fragility typology, the sample is further stratified by household gender type, distinguishing between **female-headed** and **male-headed** households. Sample sizes are adjusted so that gender‑specific subgroups are adequately represented.
-
-### 2. Fragility‑Typology Stratum  
-The primary stratum defines **four fragility categories** based on **climate risk** and **conflict** levels.
-
-#### Conflict exposure  
-*Indicators:* number of battles, protests, riots, acts of violence against civilians, and fatalities. A PCA is run on these variables, using the median as a cut-off. Departments above the median are classified as **high‑risk**; below, as **low‑risk**.
-
-#### Climate‑risk exposure  
-*Indicators:* water stress, probability of droughts affecting crops and livestock. Similar median‑based PCA classifies departments as **high‑risk** or **low‑risk**.
-
-Based on both PCAs, four typologies are defined:
-
-* **Higher Climate Risk & Conflict‑Affected**  
-* **Higher Climate Risk & Non‑Conflict‑Affected**  
-* **Lower Climate Risk & Conflict‑Affected**  
-* **Lower Climate Risk & Non‑Conflict‑Affected**
+* **Higher Climate Risk & Conflict‑Affected**: 608
+* **Higher Climate Risk & Non‑Conflict‑Affected**: 176 
+* **Lower Climate Risk & Conflict‑Affected**: 640
+* **Lower Climate Risk & Non‑Conflict‑Affected**: 176
 
 ---
+
+
+
+
