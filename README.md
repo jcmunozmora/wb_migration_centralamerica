@@ -1,10 +1,11 @@
 # The complex links between food security, migration, and fragility and violence in Northern Central America 
+[![R ≥ 4.3](https://img.shields.io/badge/R-4.3%2B-blue.svg)](https://cran.r-project.org/) 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) 
+[![Last Update](https://img.shields.io/github/last-commit/jcmunozmora/wb_migration_centralamerica.svg)](https://github.com/jcmunozmora/wb_migration_centralamerica/commits/main)
 
 This the code repository for the project "The complex links between food security, migration, and fragility and violence in Northern Central America". The World Bank, with support from the State and Peacebuilding Fund (SPF), is undertaking an analytical study to explore the intricate links between food security, migration, and fragility in NCA. This study aims to generate robust data and insights for regional and country-specific strategies. 
 
 ---
-
-## Table of Contents
 
 ## Table of Contents
 
@@ -311,6 +312,15 @@ This code is implemented using the [01_Sample_Size_MDE.r](code/R/01_Sample_Size_
 This end-to-end process enables researchers to both simulate and visualize the interplay between sample size and the detectability of effect sizes, aiding in the efficient design of surveys.
 
 ---
+
+## Authors
+
+- **[Juan Carlos Muñoz-Mora]** – PI
+- **[Laura Quintero]** 
+- **[Jorge]**
+
+For further details on contributions and acknowledgments, please refer to the `docs/` directory.
+
 
 
 

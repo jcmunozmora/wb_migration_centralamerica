@@ -28,7 +28,7 @@ targets <- c(
 
 p1_vec   <- rep(0.40, length(targets))
 m_grid   <- 5:10                     #  Number of households per cluster
-icc_grid <- c(0.04, 0.06)      # test three ICC values
+icc_grid <- c(0.03,0.04, 0.06)      # test three ICC values
 mde_grid <- c(0.08, 0.10, 0.12)      # test three effect sizes
 nrep     <- 800                      # Monte-Carlo reps
 alpha    <- 0.05
