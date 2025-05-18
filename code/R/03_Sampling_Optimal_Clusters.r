@@ -27,26 +27,30 @@ targets <- c(
 
 
 p1_vec   <- rep(0.40, length(targets))
-m_grid   <- 5:10                     #  Number of households per cluster
+m_grid <- 10:20  # Instead of 5:10                     #  Number of households per cluster
 icc_grid <- c(0.03,0.04, 0.06)      # test three ICC values
-mde_grid <- c(0.08, 0.10, 0.12)      # test three effect sizes
+mde_grid <- c(0.10, 0.12, 0.15)  # 0.08 may be too ambitious
 nrep     <- 800                      # Monte-Carlo reps
 alpha    <- 0.05
 analysis <- "tmean"                   # "glmm" or "tmean"
 ## ---------------------------------------------------------------------------
 
 ## ---------- simulator ------------------------------------------------------
-sim_one <- function(k, m, icc, p1, mde) {
+sim_one <- function(k, m_mean, m_sd, icc, p1, mde) {
   arm <- sample(rep(0:1, c(floor(k/2), ceiling(k/2))))
   sd_b <- sqrt(icc * (pi^2/3)/(1-icc))
-  b    <- rnorm(k, 0, sd_b)
-  p0   <- plogis(qlogis(p1) + b)
-  p1t  <- plogis(qlogis(p1+mde) + b)
+  b <- rnorm(k, 0, sd_b)
+  p0 <- plogis(qlogis(p1) + b)
+  p1t <- plogis(qlogis(p1+mde) + b)
   prob <- ifelse(arm==0, p0, p1t)
-  data.frame(cluster = rep(seq_len(k), each=m),
-             treat   = rep(arm, each=m),
-             outcome = rbinom(k*m, 1, rep(prob, each=m)))
+  m <- pmax(3, round(rnorm(k, m_mean, m_sd))) # Variable cluster sizes
+  data.frame(
+    cluster = rep(seq_len(k), times=m),
+    treat = rep(arm, times=m),
+    outcome = rbinom(sum(m), 1, rep(prob, times=m))
+  )
 }
+
 
 ## ---------- analysis functions --------------------------------------------
 test_glmm <- function(dat){
@@ -71,6 +75,11 @@ power_km <- function(k,m,icc,p1,mde){
 }
 
 ## ---------- grid search ----------------------------------------------------
+# Add this before the grid search
+deff <- 1 + (mean(m_grid) - 1) * max(icc_grid)
+n_eff <- n_sample / deff
+cat(sprintf("Effective sample size: %.1f (Deff=%.2f)\n", n_eff, deff))
+
 results <- lapply(names(targets), \(s){
   N <- targets[s]; p1 <- p1_vec[1]
   expand.grid(m=m_grid, icc=icc_grid, mde=mde_grid) |>

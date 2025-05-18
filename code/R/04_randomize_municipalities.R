@@ -90,10 +90,10 @@ ggsave("img/mapa_typology_mpio.png",
 ## 3. Random selection of municipalities -------------------------------------
 ###############################################################################
 sample_counts <- c(
-  "low - low"   = 3,
-  "low - high"  = 4,
-  "high - low"  = 5,
-  "high - high" = 6
+  "low - low"   = 44,
+  "low - high"  = 34,
+  "high - low"  = 44,
+  "high - high" = 44
 )
 
 selected_muni <- data_2 %>%
