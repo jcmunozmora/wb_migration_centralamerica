@@ -2,23 +2,6 @@
 
 This the code repository for the project "The complex links between food security, migration, and fragility and violence in Northern Central America". The World Bank, with support from the State and Peacebuilding Fund (SPF), is undertaking an analytical study to explore the intricate links between food security, migration, and fragility in NCA. This study aims to generate robust data and insights for regional and country-specific strategies. 
 
-## Repository Structure
-
-```text
-repo/
-├── code/
-│   └── R/
-│       ├── 01_Sample_Size_MDE.r         # Fixed‑budget → MDE calculations and power simulations
-│       ├── 03_Sampling_Optimal_Clusters.r # Optimal clustering design for sampling
-│       ├── 04_randomize_municipalities.R  # Random selection of municipalities by typology
-│       └── test.r                       # Auxiliary scripts and tests
-├── data/
-│   ├── inputs/                         # Baseline rates, ICC priors, covariate R², etc.
-│   └── derived/                        # Simulation outputs and selected sample lists
-├── img/                                # Generated figures and maps
-└── README.md    
-```
-
 ---
 
 ## Table of Contents
@@ -45,6 +28,24 @@ repo/
   - [Power Calculation](#power-calculation)
 - [Appendix / Supplementary Material](#appendix--supplementary-material)
 
+---
+
+## Repository Structure
+
+```text
+repo/
+├── code/
+│   └── R/
+│       ├── 01_Sample_Size_MDE.r         # Fixed‑budget → MDE calculations and power simulations
+│       ├── 03_Sampling_Optimal_Clusters.r # Optimal clustering design for sampling
+│       ├── 04_randomize_municipalities.R  # Random selection of municipalities by typology
+│       └── test.r                       # Auxiliary scripts and tests
+├── data/
+│   ├── inputs/                         # Baseline rates, ICC priors, covariate R², etc.
+│   └── derived/                        # Simulation outputs and selected sample lists
+├── img/                                # Generated figures and maps
+└── README.md    
+```
 ---
 
 ## Sampling Strategy - Theory
@@ -244,7 +245,65 @@ We conclude that an optimal sample size will be **1800** households for the four
 * **Lower Climate Risk & Conflict‑Affected**: 536
 * **Lower Climate Risk & Non‑Conflict‑Affected**: 384
 
+This code is implemented using the [Contribution guidelines for this project](code/R/01_Sample_Size_MDE.r). This script calculates the Minimum Detectable Effect (MDE) for both binary and continuous outcomes, using power analysis methods. It also visualizes the relationship between total sample size and MDE, and provides example calculations and population distribution by stratification. The workflow is divided into several key steps:
+
+### 1. Libraries and Helper Functions
+- **Libraries:**  
+  The script loads essential R packages such as:
+  - `pwr` for power and sample size calculations.
+  - `dplyr` for data wrangling.
+  - `ggplot2` for visualization.
+  - `readxl` for importing external data.
+  
+- **Helper Functions:**  
+  - `h2mde(h, p1)`: Converts Cohen’s h (effect size) into a difference in proportions, representing the MDE.
+  - `mde2h(mde, p1)`: Inverts the process by converting an MDE into Cohen’s h.
+
+- **Main Calculation Functions:**  
+  - `binary_mde(...)`:  
+    Calculates the smallest MDE for a binary outcome given a total sample size (`N_total`). It:
+    - Adjusts the total sample size for oversampling.
+    - Converts the adjusted total into a per-group sample size.
+    - Uses a root-finding procedure (via `uniroot`) to determine the value of Cohen’s h that matches the target power.
+    - Converts the determined Cohen’s h to an MDE.
+    
+  - `continuous_mde(...)`:  
+    Calculates the smallest MDE for a continuous outcome by:
+    - Adjusting the effective sample size similar to the binary case.
+    - Finding Cohen’s d (standardized effect size) that meets the desired power.
+    - Converting this d into an MDE on the original measurement scale by multiplying by the standard deviation.
+
+### 2. Parameter Setup and Grid Calculation
+- **Parameters:**  
+  Key parameters (e.g., significance level, power target, oversampling rate) and baseline statistics (prevalences for migration intention and food insecurity, and standard deviation for dietary diversity) are defined.
+  
+- **Simulation Grid:**  
+  A grid of candidate total sample sizes (`N_grid`) is generated (from 600 to 3000 by steps of 100).  
+  For each outcome (Migration Intention, Food Insecurity, Dietary Diversity), the corresponding MDE is calculated over this grid using the appropriate function (`binary_mde` or `continuous_mde`) and the results are stored in a data frame (`out`).
+
+### 3. Exporting the Results
+- The resulting data frame `out` (which includes total sample size, outcome labels, and computed MDEs) is exported as a CSV file for further analysis.
+
+### 4. Visualization
+- **Plotting MDE vs. Total Sample Size:**  
+  A `ggplot2` visualization is created to display the relationship between the total sample size (`N_total`) and the MDE:
+  - A line plot shows how MDE changes with varying sample sizes.
+  - A vertical dashed line is drawn at a selected sample size (`n_sample`, e.g., 1800).
+  - For each outcome, an annotation is added at the center of the MDE distribution (using the median MDE) to label the chosen sample size.
+  - A dashed horizontal line and text annotation display the MDE corresponding to `n_sample` for each outcome.
+  - The plot is faceted by Outcome, allowing a separate panel for each, and then saved as a PNG file.
+
+### 5. Additional Analysis
+- **Population Distribution by Stratum:**  
+  The script reads an external Excel file containing population data (using `readxl`), groups the data by a categorical variable (`cat_2`), and calculates the proportion as well as the expected number of households for each stratum, relative to the selected sample size.
+
+- **Example Calculation:**  
+  Finally, it demonstrates an example of what MDE values would be if the survey were conducted with exactly `n_sample` households for each outcome.
+
+This end-to-end process enables researchers to both simulate and visualize the interplay between sample size and the detectability of effect sizes, aiding in the efficient design of surveys.
+
 ---
+
 
 
 

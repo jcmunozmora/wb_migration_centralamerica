@@ -1,131 +1,100 @@
-library(lme4)
-library(dplyr)
-library(pbapply)  # Para la barra de progreso
-library(ggplot2)
+###############################################################################
+#  FULL EXPLORER  ── scan ICC × MDE for a fixed sample design
+###############################################################################
+library(dplyr); library(ggplot2); library(tidyr)
+library(lme4);  library(pbapply); library(future.apply)
+plan(multisession, workers = parallel::detectCores()-1)
+pboptions(type = "txt")
 
-############################################################
-##  Helper: simulate one clustered binary dataset
-############################################################
+n_sample <- 1800
+
+## ---------- Get the distribution  ----------------------------------------
+library(readxl)
+var <- read_excel("data/derived/variables_A3.xls")
+var <- var |> group_by(cat_2) |> summarise(n_p=sum(poblacion,na.rm=TRUE)) |>
+             mutate(n_p = n_p/sum(n_p),n=round(n_p*n_sample))
+
+print(var)
+
+## ---------- PARAMETERS  ----------------------------------------
+targets <- c(high_conflict = var$n[var$cat_2=="high - high"],
+             low_conflict  = var$n[var$cat_2=="low - high"],
+             high_non_conflict = var$n[var$cat_2=="high - low"],
+             low_non_conflict  = var$n[var$cat_2=="low - low"])
+
+p1_vec   <- rep(0.40, length(targets))
+m_grid   <- 5:10                     #  Number of households per cluster
+icc_grid <- c(0.04, 0.06, 0.08)      # test three ICC values
+mde_grid <- c(0.08, 0.10, 0.12)      # test three effect sizes
+nrep     <- 800                      # Monte-Carlo reps
+alpha    <- 0.05
+analysis <- "glmm"                   # "glmm" or "tmean"
+## ---------------------------------------------------------------------------
+
+## ---------- simulator ------------------------------------------------------
 sim_one <- function(k, m, icc, p1, mde) {
-  # p2: true prevalencia en tratamiento
-  p2 <- p1 + mde
-  
-  # generar efectos aleatorios para inducir ICC
-  sigma_b <- sqrt(icc * (pi^2 / 3) / (1 - icc))
-  b <- rnorm(k, 0, sigma_b)
-  
-  # expandir a nivel de hogar  
-  df <- data.frame(
-    cluster = rep(1:k, each = m),
-    treat   = rep(c(rep(0, floor(k/2)), rep(1, k - floor(k/2))), each = m)
-  )
-  
-  lp <- qlogis(ifelse(df$treat == 0, p1, p2)) + b[df$cluster]
-  df$outcome <- rbinom(nrow(df), 1, plogis(lp))
-  df
+  arm <- sample(rep(0:1, c(floor(k/2), ceiling(k/2))))
+  sd_b <- sqrt(icc * (pi^2/3)/(1-icc))
+  b    <- rnorm(k, 0, sd_b)
+  p0   <- plogis(qlogis(p1) + b)
+  p1t  <- plogis(qlogis(p1+mde) + b)
+  prob <- ifelse(arm==0, p0, p1t)
+  data.frame(cluster = rep(seq_len(k), each=m),
+             treat   = rep(arm, each=m),
+             outcome = rbinom(k*m, 1, rep(prob, each=m)))
 }
 
-############################################################
-##  Wrapper: Monte-Carlo power for a (k, m) combination
-############################################################
-power_km <- function(k, m, icc, p1, mde, nrep = 50) {
-  sig <- replicate(nrep, {
-    dat <- sim_one(k, m, icc, p1, mde)
-    fit <- glmer(outcome ~ treat + (1 | cluster),
-                 data = dat, family = binomial,
-                 control = glmerControl(optimizer = "bobyqa"))
-    pval <- summary(fit)$coef["treat", "Pr(>|z|)"]  # Wald test
-    pval < 0.05
-  })
-  mean(sig)  # empirical power
+## ---------- analysis functions --------------------------------------------
+test_glmm <- function(dat){
+  fit <- glmer(outcome ~ treat + (1|cluster), data=dat,
+               family=binomial,
+               control=glmerControl(optimizer="bobyqa", calc.derivs=FALSE))
+  as.numeric(summary(fit)$coef["treat","Pr(>|z|)"] < alpha)
+}
+test_tmean <- function(dat){
+  clu <- dat |> group_by(cluster,treat) |> summarise(p=mean(outcome),.groups="drop")
+  if(length(unique(clu$treat))<2) return(NA_real_)
+  as.numeric(t.test(p~factor(treat),data=clu)$p.value < alpha)
+}
+tester <- if(analysis=="glmm") test_glmm else test_tmean
+
+power_km <- function(k,m,icc,p1,mde){
+  hits <- future_replicate(nrep,{
+    dat <- sim_one(k,m,icc,p1,mde)
+    tryCatch(tester(dat), error=function(e) NA_real_)
+  },future.seed=TRUE)
+  mean(hits,na.rm=TRUE)
 }
 
-############################################################
-##  Grid search around your targets per stratum
-############################################################
-# target sample sizes per stratum
-target <- c(
-  high_conflict     = 608,
-  high_non_conflict = 176,
-  low_conflict      = 640,
-  low_non_conflict  = 176
-)
+## ---------- grid search ----------------------------------------------------
+results <- lapply(names(targets), \(s){
+  N <- targets[s]; p1 <- p1_vec[1]
+  expand.grid(m=m_grid, icc=icc_grid, mde=mde_grid) |>
+    mutate(k        = ceiling(N / m),
+           n_design = k*m,
+           power    = pblapply(seq_len(n()), \(i)
+                                power_km(k[i],m[i],icc[i],p1,mde[i]))) |>
+    unnest(power) |> mutate(Stratum=s)
+}) |> bind_rows()
 
-icc   <- 0.06   # assumed common ICC (adjust as needed)
-p1    <- 0.40   # baseline food-insecurity prevalence
-mde   <- 0.08   # effect size you care to detect (e.g. 8 percentage points)
+## ---------- pretty print ---------------------------------------------------
+options(pillar.sigfig = 4)
+print(filter(results, m %in% c(7,9,12)) |> head(20))
 
-# Grid de posibles valores: m = households per cluster (por ejemplo, de 8 a 25)
-grid <- expand.grid(
-  m = 8:25  # HH per cluster
-)
+## ---------- designs that hit ≥ 0.80 ---------------------------------------
+good <- results |> filter(power>=0.80) |>
+        group_by(Stratum) |> slice_min(n_design, n=1, with_ties=FALSE)
+print(good)
 
-# Usamos pblapply en lugar de lapply para ver el progreso
-out <- pblapply(names(target), function(stratum) {
-  n_tot <- target[stratum]
-  grid %>%
-    mutate(
-      k = ceiling(n_tot / m),          # número de clústeres mínimos requeridos
-      n_design = k * m                 # total de HH en el diseño
-    ) %>%
-    rowwise() %>%
-    mutate(
-      power = power_km(k, m, icc = icc, p1 = p1, mde = mde, nrep = 400)
-    ) %>%
-    ungroup() %>%
-    mutate(Stratum = stratum)
-}) %>% 
-  bind_rows()
+## ---------- heat-map of power ---------------------------------------------
+ggplot(results, aes(factor(m), factor(mde),
+                    fill = pmin(power,1))) +
+  geom_tile() +
+  facet_grid(Stratum ~ icc, labeller = label_both) +
+  scale_fill_viridis_c(name="Power", limits=c(0,1)) +
+  labs(title=paste("Power heat-map (analysis:",analysis,", nrep=",nrep,")"),
+       x="Households per cluster (m)", y="MDE") +
+  theme_minimal(base_size=11)
 
-############################################################
-##  Seleccionar el “diseño óptimo” en cada estrato  
-##  (minimizar el total de HH incluidos mientras se alcanza
-##   la potencia objetivo, ≥ 0.80)
-############################################################
-
-design_opt <- out %>%
-  filter(power >= 0.80) %>%
-  group_by(Stratum) %>%
-  slice_min(n_design, n = 1) %>%  # Diseño con menor n_design
-  ungroup()
-
-print(design_opt)
-
-############################################################
-##  Graphs  
-############################################################
-
-# Gráfico de la grilla de diseño y potencia por estrato
-ggplot(out, aes(x = m, y = n_design, color = Stratum, group = Stratum)) +
-  geom_line(alpha = 0.7) +
-  geom_point(alpha = 0.7) +
-  # Resaltar el diseño óptimo con un punto de mayor tamaño y borde en rojo
-  geom_point(data = design_opt, aes(x = m, y = n_design),
-             color = "red", size = 4, shape = 21, fill = "red") +
-  facet_wrap(~Stratum, scales = "free_y") +
-  labs(title = "Diseño óptimo: Total de HH vs. HH por clúster (m)",
-       x = "Households per cluster (m)",
-       y = "Total de HH en el diseño (n_design)",
-       color = "Estrato") +
-  theme_minimal(base_size = 12)
-
-ggsave("img/Sampling_Optimal_Clusters.png", width = 10, height = 6, dpi = 300)
-
-# Gráfico de la grilla de diseño y potencia por estrato
-ggplot(out, aes(x = m, y = n_design, color = Stratum, group = Stratum)) +
-  geom_line(alpha = 0.7) +
-  geom_point(alpha = 0.7) +
-  # Agregar etiquetas de potencia (si se desea, por ejemplo, como texto)
-  # geom_text(aes(label = round(power, 2)), hjust = -0.2, size=3) +
-  # Resaltar el diseño óptimo con un punto de mayor tamaño y borde en rojo
-  geom_point(data = design_opt, aes(x = m, y = n_design),
-             color = "red", size = 4, shape = 21, fill = "red") +
-  facet_wrap(~Stratum, scales = "free_y") +
-  labs(title = "Diseño óptimo: Total de HH vs. HH por clúster (m)",
-       x = "Households per cluster (m)",
-       y = "Total de HH en el diseño (n_design)",
-       color = "Estrato") +
-  theme_minimal(base_size = 12)
-
-# Si deseas guardar el gráfico:
-ggsave("img/Sampling_Optimal_Clusters.png", width = 10, height = 6, dpi = 300)
+ggsave(paste0("img/power_heat_",analysis,".png"),
+       width=9, height=6, dpi=300)
